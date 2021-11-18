@@ -1,0 +1,16 @@
+{
+  "name": "OpenWeatherAPI3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx newman run OpenWeatherAPI3.postman_collection.json -e OpenWeatherAPI3_Env.postman_environment.json -r cli,htmlextra"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "newman": "5.3.0",
+    "newman-reporter-htmlextra": "1.22.3"
+  }
+}

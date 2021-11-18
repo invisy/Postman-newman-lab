@@ -1,0 +1,666 @@
+{
+	"info": {
+		"_postman_id": "9fd02bc6-32f5-4f9c-aaa5-7087815040fd",
+		"name": "OpenWeatherAPI3",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Add station",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set('station_external_id', \"test_station\");\r",
+							"pm.environment.set('station_name', \"test station\");\r",
+							"pm.environment.set('station_latitude', 1.1);\r",
+							"pm.environment.set('station_longitude', 1.2);\r",
+							"pm.environment.set('station_altitude', 1.3);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(request.name + \" - successful POST request\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - Content-Type is correct\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-type')).to.eql('application/json; charset=utf-8');\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"const schema = {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"ID\": { \"type\": \"string\" },\r",
+							"        \"updated_at\": { \"type\": \"string\" },\r",
+							"        \"created_at\": { \"type\": \"string\" },\r",
+							"        \"user_id\": { \"type\": \"string\" },\r",
+							"        \"external_id\": { \"type\": \"string\" },\r",
+							"        \"name\": { \"type\": \"string\" },\r",
+							"        \"latitude\": { \"type\": \"number\" },\r",
+							"        \"longitude\": { \"type\": \"number\" },\r",
+							"        \"altitude\": { \"type\": \"number\" },\r",
+							"        \"rank\": { \"type\": \"number\" },\r",
+							"        \"source_type\": { \"type\": \"number\" }\r",
+							"    }, \r",
+							"    \"required\": [\"ID\", \"updated_at\", \"created_at\", \"user_id\", \"external_id\", \"name\", \"latitude\", \"longitude\", \"altitude\", \"rank\", \"source_type\"]\r",
+							"};\r",
+							"\r",
+							"pm.test(request.name + \" - validate response schema\", () => {\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - validate that response values are correct\", () => {\r",
+							"    pm.expect(jsonData.external_id).to.eql(pm.environment.get('station_external_id'));\r",
+							"    pm.expect(jsonData.name).to.eql(pm.environment.get('station_name'));\r",
+							"    pm.expect(jsonData.latitude).to.eql(pm.environment.get('station_latitude'));\r",
+							"    pm.expect(jsonData.longitude).to.eql(pm.environment.get('station_longitude'));\r",
+							"    pm.expect(jsonData.altitude).to.eql(pm.environment.get('station_altitude'));\r",
+							"})\r",
+							"\r",
+							"const createdStationId = jsonData.ID;\r",
+							"\r",
+							"pm.test(request.name + \" - PostAct - Remove station\", () => {\r",
+							"    const requestDataClean = {\r",
+							"        url: pm.environment.get('url') + \"/stations/\" + createdStationId + \"?appid=\" + pm.environment.get('appid'),\r",
+							"        method: \"DELETE\",\r",
+							"        body: {},\r",
+							"    }\r",
+							"    \r",
+							"    pm.sendRequest(requestDataClean, function (err, res) {\r",
+							"        pm.expect(res.code).to.eql(204);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"external_id\": \"{{station_external_id}}\",\r\n  \"name\": \"{{station_name}}\",\r\n  \"latitude\": {{station_latitude}},\r\n  \"longitude\": {{station_longitude}},\r\n  \"altitude\": {{station_altitude}}\r\n}"
+				},
+				"url": {
+					"raw": "{{url}}/stations",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"stations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Stations",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set('station_external_id', \"test_station\");\r",
+							"pm.environment.set('station_name', \"test station\");\r",
+							"pm.environment.set('station_latitude', 1.1);\r",
+							"pm.environment.set('station_longitude', 1.2);\r",
+							"pm.environment.set('station_altitude', 1.3);\r",
+							"\r",
+							"pm.environment.set('station2_external_id', \"test_station_2\");\r",
+							"pm.environment.set('station2_name', \"test station 2\");\r",
+							"pm.environment.set('station2_latitude', 1.4);\r",
+							"pm.environment.set('station2_longitude', 1.5);\r",
+							"pm.environment.set('station2_altitude', 1.6);\r",
+							"\r",
+							"const requestDataAddStation1 = {\r",
+							"    url: pm.environment.get('url') + \"/stations?appid=\" + pm.environment.get('appid'),\r",
+							"    method: \"POST\",\r",
+							"    header: {\r",
+							"        \"Content-type\" : \"application/json\"\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: \"raw\",\r",
+							"        raw: JSON.stringify({\r",
+							"            \"external_id\": pm.environment.get(\"station_external_id\"),\r",
+							"            \"name\": pm.environment.get(\"station_name\"),\r",
+							"            \"latitude\":  pm.environment.get(\"station_latitude\"),\r",
+							"            \"longitude\":  pm.environment.get(\"station_longitude\"),\r",
+							"            \"altitude\": pm.environment.get(\"station_altitude\")\r",
+							"        })\r",
+							"    },\r",
+							"}\r",
+							"\r",
+							"const requestDataAddStation2 = {\r",
+							"    url: pm.environment.get('url') + \"/stations?appid=\" + pm.environment.get('appid'),\r",
+							"    method: \"POST\",\r",
+							"    header: {\r",
+							"        \"Content-type\" : \"application/json\"\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: \"raw\",\r",
+							"        raw: JSON.stringify({\r",
+							"            \"external_id\": pm.environment.get(\"station2_external_id\"),\r",
+							"            \"name\": pm.environment.get(\"station2_name\"),\r",
+							"            \"latitude\":  pm.environment.get(\"station2_latitude\"),\r",
+							"            \"longitude\":  pm.environment.get(\"station2_longitude\"),\r",
+							"            \"altitude\": pm.environment.get(\"station2_altitude\")\r",
+							"        })\r",
+							"    },\r",
+							"}\r",
+							"\r",
+							"pm.sendRequest(requestDataAddStation1, function (err, res) {\r",
+							"    if (res.code == 201)\r",
+							"        console.log(\"Get stations - pre-request1 success\");\r",
+							"        pm.environment.set(\"station_id\", res.json().ID)\r",
+							"});\r",
+							"\r",
+							"pm.sendRequest(requestDataAddStation2, function (err, res) {\r",
+							"    if (res.code == 201)\r",
+							"        console.log(\"Get stations - pre-request2 success\");\r",
+							"        pm.environment.set(\"station2_id\", res.json().ID)\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(request.name + \" - successful GET request\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - Content-Type is correct\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-type')).to.eql('application/json; charset=utf-8');\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"const schema = {\r",
+							"    \"type\": \"array\",\r",
+							"    \"items\": {\r",
+							"        \"type\": \"object\",\r",
+							"        \"items\": {\r",
+							"            \"id\": { \"type\": \"string\" },\r",
+							"            \"created_at\": { \"type\": \"string\" },\r",
+							"            \"updated_at\": { \"type\": \"string\" },\r",
+							"            \"external_id\": { \"type\": \"string\" },\r",
+							"            \"name\": { \"type\": \"string\" },\r",
+							"            \"longitude\": { \"type\": \"number\" },\r",
+							"            \"latitude\": { \"type\": \"number\" },\r",
+							"            \"altitude\": { \"type\": \"number\" },\r",
+							"            \"rank\": { \"type\": \"number\" },\r",
+							"        }, \r",
+							"        \"required\": [\"id\", \"updated_at\", \"created_at\", \"external_id\", \"name\", \"latitude\", \"longitude\", \"altitude\", \"rank\", ]\r",
+							"    }\r",
+							"};\r",
+							"\r",
+							"pm.test(request.name + \" - validate response schema\", function () {\r",
+							"    pm.expect(jsonData.length).above(1);\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							"const createdStation1Id = pm.environment.get('station_id');\r",
+							"const createdStation2Id = pm.environment.get('station2_id');\r",
+							"\r",
+							"var station1 = null;\r",
+							"var station2 = null;\r",
+							"\r",
+							"jsonData.forEach(station => {\r",
+							"    if(station.id == createdStation1Id)\r",
+							"        station1 = station;\r",
+							"    else if(station.id == createdStation2Id)\r",
+							"        station2 = station;\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - validate that station1 values are correct\", () => {\r",
+							"    pm.expect(station1.id).to.eql(createdStation1Id);\r",
+							"    pm.expect(station1.external_id).to.eql(pm.environment.get('station_external_id'));\r",
+							"    pm.expect(station1.name).to.eql(pm.environment.get('station_name'));\r",
+							"    pm.expect(station1.latitude).to.eql(pm.environment.get('station_latitude'));\r",
+							"    pm.expect(station1.longitude).to.eql(pm.environment.get('station_longitude'));\r",
+							"    pm.expect(station1.altitude).to.eql(pm.environment.get('station_altitude'));\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - validate that station2 values are correct\", () => {\r",
+							"    pm.expect(station2.id).to.eql(createdStation2Id);\r",
+							"    pm.expect(station2.external_id).to.eql(pm.environment.get('station2_external_id'));\r",
+							"    pm.expect(station2.name).to.eql(pm.environment.get('station2_name'));\r",
+							"    pm.expect(station2.latitude).to.eql(pm.environment.get('station2_latitude'));\r",
+							"    pm.expect(station2.longitude).to.eql(pm.environment.get('station2_longitude'));\r",
+							"    pm.expect(station2.altitude).to.eql(pm.environment.get('station2_altitude'));\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - PostAct - Remove stations\", () => {\r",
+							"    const request1DataClean = {\r",
+							"        url: pm.environment.get('url') + \"/stations/\" + createdStation1Id + \"?appid=\" + pm.environment.get('appid'),\r",
+							"        method: \"DELETE\",\r",
+							"        body: {},\r",
+							"    }\r",
+							"    \r",
+							"    pm.sendRequest(request1DataClean, function (err, res) {\r",
+							"        pm.expect(res.code).to.eql(204);\r",
+							"    });\r",
+							"\r",
+							"    const request2DataClean = {\r",
+							"        url: pm.environment.get('url') + \"/stations/\" + createdStation2Id + \"?appid=\" + pm.environment.get('appid'),\r",
+							"        method: \"DELETE\",\r",
+							"        body: {},\r",
+							"    }\r",
+							"    \r",
+							"    pm.sendRequest(request2DataClean, function (err, res) {\r",
+							"        pm.expect(res.code).to.eql(204);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/stations",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"stations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Station",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set('station_external_id', \"test_station\");\r",
+							"pm.environment.set('station_name', \"test station\");\r",
+							"pm.environment.set('station_latitude', 1.1);\r",
+							"pm.environment.set('station_longitude', 1.2);\r",
+							"pm.environment.set('station_altitude', 1.3);\r",
+							"\r",
+							"const requestData = {\r",
+							"    url: pm.environment.get('url') + \"/stations?appid=\" + pm.environment.get('appid'),\r",
+							"    method: \"POST\",\r",
+							"    header: {\r",
+							"        \"Content-type\" : \"application/json\"\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: \"raw\",\r",
+							"        raw: JSON.stringify({\r",
+							"            \"external_id\": pm.environment.get(\"station_external_id\"),\r",
+							"            \"name\": pm.environment.get(\"station_name\"),\r",
+							"            \"latitude\":  pm.environment.get(\"station_latitude\"),\r",
+							"            \"longitude\":  pm.environment.get(\"station_longitude\"),\r",
+							"            \"altitude\": pm.environment.get(\"station_altitude\")\r",
+							"        })\r",
+							"    },\r",
+							"}\r",
+							"\r",
+							"pm.sendRequest(requestData, function (err, res) {\r",
+							"    if (res.code == 201)\r",
+							"        console.log(\"Get station - pre-request success\");\r",
+							"        pm.environment.set(\"station_id\", res.json().ID)\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(request.name + \" - successful GET request\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - Content-Type is correct\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-type')).to.eql('application/json; charset=utf-8');\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"const schema = {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"id\": { \"type\": \"string\" },\r",
+							"        \"created_at\": { \"type\": \"string\" },\r",
+							"        \"updated_at\": { \"type\": \"string\" },\r",
+							"        \"external_id\": { \"type\": \"string\" },\r",
+							"        \"name\": { \"type\": \"string\" },\r",
+							"        \"longitude\": { \"type\": \"number\" },\r",
+							"        \"latitude\": { \"type\": \"number\" },\r",
+							"        \"altitude\": { \"type\": \"number\" },\r",
+							"        \"rank\": { \"type\": \"number\" },\r",
+							"    }, \r",
+							"    \"required\": [\"id\", \"updated_at\", \"created_at\", \"external_id\", \"name\", \"latitude\", \"longitude\", \"altitude\", \"rank\", ]\r",
+							"};\r",
+							"\r",
+							"pm.test(request.name + \" - validate response schema\", () => {\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - validate that response values are correct\", () => {\r",
+							"    pm.expect(jsonData.id).to.eql(pm.environment.get('station_id'));\r",
+							"    pm.expect(jsonData.external_id).to.eql(pm.environment.get('station_external_id'));\r",
+							"    pm.expect(jsonData.name).to.eql(pm.environment.get('station_name'));\r",
+							"    pm.expect(jsonData.latitude).to.eql(pm.environment.get('station_latitude'));\r",
+							"    pm.expect(jsonData.longitude).to.eql(pm.environment.get('station_longitude'));\r",
+							"    pm.expect(jsonData.altitude).to.eql(pm.environment.get('station_altitude'));\r",
+							"})\r",
+							"\r",
+							"const createdStationId = pm.environment.get('station_id');\r",
+							"\r",
+							"pm.test(request.name + \" - PostAct - Remove station\", () => {\r",
+							"    const requestDataClean = {\r",
+							"        url: pm.environment.get('url') + \"/stations/\" + createdStationId + \"?appid=\" + pm.environment.get('appid'),\r",
+							"        method: \"DELETE\",\r",
+							"        body: {},\r",
+							"    }\r",
+							"    \r",
+							"    pm.sendRequest(requestDataClean, function (err, res) {\r",
+							"        pm.expect(res.code).to.eql(204);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/stations/{{station_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"stations",
+						"{{station_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update station",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.environment.set('station_external_id', \"test_station\");\r",
+							"pm.environment.set('station_name', \"test station\");\r",
+							"pm.environment.set('station_latitude', 1.1);\r",
+							"pm.environment.set('station_longitude', 1.2);\r",
+							"pm.environment.set('station_altitude', 1.3);\r",
+							"\r",
+							"pm.environment.set('station2_external_id', \"test_station_upd\");\r",
+							"pm.environment.set('station2_name', \"test station upd\");\r",
+							"pm.environment.set('station2_latitude', 1.4);\r",
+							"pm.environment.set('station2_longitude', 1.5);\r",
+							"pm.environment.set('station2_altitude', 1.6);\r",
+							"\r",
+							"const requestData = {\r",
+							"    url: pm.environment.get('url') + \"/stations?appid=\" + pm.environment.get('appid'),\r",
+							"    method: \"POST\",\r",
+							"    header: {\r",
+							"        \"Content-type\" : \"application/json\"\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: \"raw\",\r",
+							"        raw: JSON.stringify({\r",
+							"            \"external_id\": pm.environment.get(\"station_external_id\"),\r",
+							"            \"name\": pm.environment.get(\"station_name\"),\r",
+							"            \"latitude\":  pm.environment.get(\"station_latitude\"),\r",
+							"            \"longitude\":  pm.environment.get(\"station_longitude\"),\r",
+							"            \"altitude\": pm.environment.get(\"station_altitude\")\r",
+							"        })\r",
+							"    },\r",
+							"}\r",
+							"\r",
+							"pm.sendRequest(requestData, function (err, res) {\r",
+							"    if (res.code == 201)\r",
+							"        console.log(\"Update station - pre-request success\");\r",
+							"        pm.environment.set(\"station_id\", res.json().ID)\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(request.name + \" - successful PUT request\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - Content-Type is correct\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-type')).to.eql('application/json; charset=utf-8');\r",
+							"});\r",
+							"\r",
+							"const jsonData = pm.response.json();\r",
+							"\r",
+							"const schema = {\r",
+							"    \"type\": \"object\",\r",
+							"    \"properties\": {\r",
+							"        \"ID\": { \"type\": \"string\" },\r",
+							"        \"updated_at\": { \"type\": \"string\" },\r",
+							"        \"created_at\": { \"type\": \"string\" },\r",
+							"        \"user_id\": { \"type\": \"string\" },\r",
+							"        \"external_id\": { \"type\": \"string\" },\r",
+							"        \"name\": { \"type\": \"string\" },\r",
+							"        \"latitude\": { \"type\": \"number\" },\r",
+							"        \"longitude\": { \"type\": \"number\" },\r",
+							"        \"altitude\": { \"type\": \"number\" },\r",
+							"        \"rank\": { \"type\": \"number\" },\r",
+							"        \"source_type\": { \"type\": \"number\" }\r",
+							"    }, \r",
+							"    \"required\": [\"updated_at\", \"created_at\", \"external_id\", \"name\", \"latitude\", \"longitude\", \"altitude\", \"rank\"]\r",
+							"};\r",
+							"\r",
+							"pm.test(request.name + \" - validate response schema\", () => {\r",
+							"    pm.response.to.have.jsonSchema(schema);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - validate that values were updated\", () => {\r",
+							"    pm.expect(jsonData.id).to.eql(pm.environment.get('station_id'));\r",
+							"    pm.expect(jsonData.external_id).to.eql(pm.environment.get('station2_external_id'));\r",
+							"    pm.expect(jsonData.name).to.eql(pm.environment.get('station2_name'));\r",
+							"    pm.expect(jsonData.latitude).to.eql(pm.environment.get('station2_latitude'));\r",
+							"    pm.expect(jsonData.longitude).to.eql(pm.environment.get('station2_longitude'));\r",
+							"    pm.expect(jsonData.altitude).to.eql(pm.environment.get('station2_altitude'));\r",
+							"})\r",
+							"\r",
+							"const createdStationId = pm.environment.get('station_id');\r",
+							"\r",
+							"pm.test(request.name + \" - PostAct - Remove station\", () => {\r",
+							"    const requestDataClean = {\r",
+							"        url: pm.environment.get('url') + \"/stations/\" + createdStationId + \"?appid=\" + pm.environment.get('appid'),\r",
+							"        method: \"DELETE\",\r",
+							"        body: {},\r",
+							"    }\r",
+							"    \r",
+							"    pm.sendRequest(requestDataClean, function (err, res) {\r",
+							"        pm.expect(res.code).to.eql(204);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"external_id\": \"{{station2_external_id}}\",\r\n  \"name\": \"{{station2_name}}\",\r\n  \"latitude\": {{station2_latitude}},\r\n  \"longitude\": {{station2_longitude}},\r\n  \"altitude\": {{station2_altitude}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/stations/{{station_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"stations",
+						"{{station_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete station",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const requestData = {\r",
+							"    url: pm.environment.get('url') + \"/stations?appid=\" + pm.environment.get('appid'),\r",
+							"    method: \"POST\",\r",
+							"    header: {\r",
+							"        \"Content-type\" : \"application/json\"\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: \"raw\",\r",
+							"        raw: JSON.stringify({\r",
+							"            \"external_id\": pm.environment.get(\"station_external_id\"),\r",
+							"            \"name\": pm.environment.get(\"station_name\"),\r",
+							"            \"latitude\":  pm.environment.get(\"station_latitude\"),\r",
+							"            \"longitude\":  pm.environment.get(\"station_longitude\"),\r",
+							"            \"altitude\": pm.environment.get(\"station_altitude\")\r",
+							"        })\r",
+							"    },\r",
+							"}\r",
+							"\r",
+							"pm.sendRequest(requestData, function (err, res) {\r",
+							"    if (res.code == 201)\r",
+							"        console.log(\"Delete station - pre-request success\");\r",
+							"        pm.environment.set(\"station_id\", res.json().ID)\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(request.name + \" - successful DELETE request\", function () {\r",
+							"    pm.response.to.have.status(204);\r",
+							"});\r",
+							"\r",
+							"pm.test(request.name + \" - station was deleted\", () => {\r",
+							"    const requestDelete = {\r",
+							"        url: pm.environment.get('url') + \"/stations/\" + pm.environment.get('station_id') + \"?appid=\" + pm.environment.get('appid'),\r",
+							"        method: \"DELETE\",\r",
+							"        body: {},\r",
+							"    }\r",
+							"    \r",
+							"    pm.sendRequest(requestDelete, function (err, res) {\r",
+							"        pm.expect(res.code).to.eql(404);\r",
+							"    });\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/stations/{{station_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"stations",
+						"{{station_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{appid}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "appid",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "query",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
